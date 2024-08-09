@@ -1,3 +1,5 @@
+import 'dart:js_interop_unsafe';
+
 import 'package:flutter/material.dart';
 import 'user_page.dart';
 import 'task_page.dart';
@@ -29,15 +31,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 44,
-        backgroundColor: const Color.fromRGBO(93, 203, 125, 100),
         elevation: 0,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(30), // Set the desired height here
+          preferredSize: const Size.fromHeight(8), // Set the desired height here
           child: TabBar(
+            labelColor: Colors.black,
+            unselectedLabelColor: Colors.grey,
+            indicatorColor: Colors.black,
             controller: _tabController,
             tabs: const <Widget>[
-              Tab(icon: Icon(Icons.person,color: Colors.white,), text: 'Members'),
-              Tab(icon: Icon(Icons.task,color: Colors.white,), text: 'Task'),
+              Tab(text: 'Members'),
+              Tab(text: 'Task'),
             ],
           ),
         ),

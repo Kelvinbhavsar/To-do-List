@@ -54,6 +54,7 @@ class _UserPageState extends State<UserPage> {
                 TextFormField(
                   decoration: const InputDecoration(labelText: 'Name'),
                   onChanged: (value) {
+                    print("object");
                     name = value;
                   },
                   validator: (value) {
