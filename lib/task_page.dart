@@ -207,17 +207,6 @@ class _AddTaskPageState extends State<AddTaskPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add New Task'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              if (selectedUser != null && tasks.isNotEmpty) {
-                Navigator.of(context)
-                    .pop({"tasks": tasks, "user": selectedUser, "time": taskTime});
-              }
-            },
-            child: const Text('Save', style: TextStyle(color: Colors.white)),
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
