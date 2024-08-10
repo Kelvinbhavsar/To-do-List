@@ -156,7 +156,8 @@ class _TaskScreenState extends State<TaskScreen> {
                             alignment: Alignment(-0.8, 0),
                             child: Text(
                               "Submitted Tasks",
-                              style: TextStyle(fontSize: 20),
+                              style: TextStyle(
+                                  fontSize: 20, color: Colors.black87),
                             ),
                           ),
                           ListView.builder(
@@ -174,13 +175,15 @@ class _TaskScreenState extends State<TaskScreen> {
                                   title: Text(
                                     data2[index]['taskname']!,
                                     style: const TextStyle(
+                                      color: Colors.black45,
                                       decoration: TextDecoration.lineThrough,
                                     ),
                                   ),
                                   subtitle: Align(
                                     alignment: Alignment.bottomRight,
                                     child: Text(
-                                        'assigned on : ${ts.toDate().day} , ${months[ts.toDate().month - 1]}'),
+                                        style: TextStyle(color: Colors.black87),
+                                        'assigned on : ${ts.toDate().day} , ${months[ts.toDate().month - 1]} ${ts.toDate().year.toString().substring(2, 4)}'),
                                   ),
 
                                   /// delete button for submitted tasks

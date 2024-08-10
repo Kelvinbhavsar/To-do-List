@@ -35,7 +35,7 @@ class _GoogleSignInScreenState extends State<GoogleSignInScreen> {
               'assets/images/logo.png',
               height: 20.h,
             ),
-            SizedBox(height: 1.h),
+            SizedBox(height: 4.h),
             ElevatedButton(
               onPressed: () async {
                 try {
