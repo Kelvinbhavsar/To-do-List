@@ -40,7 +40,7 @@ dependencies:
   cloud_firestore:
   google_sign_in:
   shared_preferences:
-
+  sizer:
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -64,8 +64,9 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/images/logo.png
+    - assets/images/google_logo.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

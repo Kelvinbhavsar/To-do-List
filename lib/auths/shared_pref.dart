@@ -21,12 +21,22 @@ class SharedPrefService {
     return sharedPref.getString('gmail');
   }
 
+  static Future setImageUrl({required imageUrl}) async {
+    SharedPreferences sharedPref = await SharedPreferences.getInstance();
+    return sharedPref.setString('imageUrl', imageUrl);
+  }
+
+  static Future getImageUrl() async {
+    SharedPreferences sharedPref = await SharedPreferences.getInstance();
+    return sharedPref.getString("imageUrl");
+  }
+
   static Future logOut() async {
     SharedPreferences sharedPref = await SharedPreferences.getInstance();
     return sharedPref.remove('username');
   }
 
-  static Future setOtpCheck({required OTP, required currentUsername}) async {
+  /*static Future setOtpCheck({required OTP, required currentUsername}) async {
     SharedPreferences sharedPref = await SharedPreferences.getInstance();
     return sharedPref.setString('${currentUsername}', OTP);
   }
@@ -34,8 +44,7 @@ class SharedPrefService {
   static Future getOtpCheck({required currentUsername}) async {
     SharedPreferences sharedPref = await SharedPreferences.getInstance();
     return sharedPref.getString('${currentUsername}');
-  }
-
+  }*/
 /*SharedPreferences sharedPref = SharedPreferences.getInstance() as SharedPreferences;
   Future setUser({required username }) async{
     return sharedPref.setString('username', username);
