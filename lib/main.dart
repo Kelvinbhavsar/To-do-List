@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
-import 'package:user_todo/screens/google_sign_in_screen.dart';
 import 'package:user_todo/screens/splash_screen.dart';
 
 void main() async {
