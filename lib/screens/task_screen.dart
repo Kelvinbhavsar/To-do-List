@@ -381,7 +381,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                         .doc(task.trim())
                         .set({
                       'name': _name,
-                      'taskname': task,
+                      'taskname': task.trim(),
                       'createtime': Timestamp.now(),
                       'submittime': '-',
                       'email': _email,
