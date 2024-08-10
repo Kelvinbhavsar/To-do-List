@@ -1,6 +1,7 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_2/auths/firebase_auths.dart';
 
 class UserScreen extends StatefulWidget {
   const UserScreen({super.key});
@@ -12,7 +13,118 @@ class UserScreen extends StatefulWidget {
 class _UserScreenState extends State<UserScreen> {
   final TextEditingController _username = TextEditingController();
   final TextEditingController _userEmail = TextEditingController();
+
   void _addUser() {
+    String name = '';
+    String email = '';
+    final _emailFormKey = GlobalKey<FormState>();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 16.0,
+            right: 16.0,
+            top: 16.0,
+          ),
+          child: Form(
+            key: _emailFormKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text(
+                  'Add New User',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _username,
+                  decoration: const InputDecoration(labelText: 'Name'),
+                  onChanged: (value) {
+                    name = value;
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a name';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _userEmail,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  onChanged: (value) {
+                    email = value;
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an email';
+                    } else if (!RegExp(r'^[^@]+@gmail\.com$').hasMatch(value)) {
+                      return 'Please enter a valid @gmail.com email address';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        final email = _userEmail.text.trim();
+                        log("${email}");
+                        if (email.endsWith('@gmail.com')) {
+                          // Email is valid, add user
+                          FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(email)
+                              .set({
+                            "name": _username.text.trim(),
+                            "email": email,
+                          }).whenComplete(() {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                duration: Duration(milliseconds: 1500),
+                                content: Text("User Added Successfully")));
+                            Navigator.pop(context);
+                          });
+                        } else {
+                          // Email is not valid, show error
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              duration: Duration(milliseconds: 1500),
+                              content:
+                                  Text('Please enter a valid Gmail address'),
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text('Add'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /*void _addUser() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -38,14 +150,61 @@ class _UserScreenState extends State<UserScreen> {
           ),
           actions: <Widget>[
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-              ),
-              child: const Text('Add', style: TextStyle(color: Colors.white)),
+              child: const Text('Add'),
+              onPressed: () {
+                final email = _userEmail.text.trim();
+                if (email.endsWith('@gmail.com')) {
+                  // Email is valid, add user
+                  FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(email)
+                      .set({
+                    "name": _username.text.trim(),
+                    "email": email,
+                  }).whenComplete(() {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("User Added Successfully")));
+                    Navigator.pop(context);
+                  });
+                } else {
+                  // Email is not valid, show error
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Please enter a valid Gmail address'),
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }*/
+
+  void _confirmDelete(String email) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion'),
+          content: Text(
+              'Are you sure you want to delete the user with email $email?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Delete'),
               onPressed: () async {
-                await userCollection
-                    .doc(_userEmail.text)
-                    .set({"name": _username.text, "email": _userEmail.text}).whenComplete(() => Navigator.pop(context));
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(email)
+                    .delete()
+                    .whenComplete(() => Navigator.pop(context));
               },
             ),
           ],
@@ -59,10 +218,7 @@ class _UserScreenState extends State<UserScreen> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: _addUser,
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
+        child: const Icon(Icons.add),
       ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance.collection("users").snapshots(),
@@ -73,16 +229,19 @@ class _UserScreenState extends State<UserScreen> {
               itemCount: snapshot.data!.docs.length,
               itemBuilder: (context, index) {
                 return Card(
-                  margin:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                  margin: const EdgeInsets.symmetric(
+                      vertical: 8.0, horizontal: 16.0),
                   child: ListTile(
-                    title: Text('User: ${data[index]['name']}'),
-                    subtitle: Text('Email: ${data[index]['email']}'),
+                    title: Text('${data[index]['name']}'),
+                    subtitle: Text(
+                      '${data[index]['email']}',
+                      style: TextStyle(color: Colors.grey),
+                    ),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete),
-                      color: Colors.red,
-                      onPressed: ()async{
-                         FirebaseFirestore.instance.collection('users').doc(data[index]['email'].toString()).delete();
+                      color: Colors.black45,
+                      onPressed: () {
+                        _confirmDelete(data[index]['email'].toString());
                       },
                     ),
                   ),
