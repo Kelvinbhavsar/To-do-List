@@ -111,9 +111,7 @@ class _TaskScreenState extends State<TaskScreen> {
                                               onPressed: () async {
                                                 await taskCollection
                                                     .doc(
-                                                        convertSpaceToUnderScore(
-                                                            data[index]
-                                                                ['taskname']))
+                                                        data[index]['taskname'])
                                                     .update({
                                                   'submittime': Timestamp.now()
                                                 }).then(
@@ -136,6 +134,8 @@ class _TaskScreenState extends State<TaskScreen> {
               },
             ),
             Divider(),
+
+            /// submit
             StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection('tasks')

@@ -12,6 +12,8 @@ String? gmailName;
 String? gmailEmail;
 bool? isNewUser;
 String? imageUrl;
+
+// todo : change regex when launch
 final RegExp emailPattern = RegExp(r'^\d{2}amtics\d{3}@gmail\.com$');
 
 Future<String> otpVerificationStatus() async {
