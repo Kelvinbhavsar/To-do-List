@@ -1,175 +1,420 @@
-/*
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:developer';
 
-class UserPage extends StatefulWidget {
-  const UserPage({Key? key}) : super(key: key);
+import 'package:flutter/widgets.dart';
+
+class TaskScreen extends StatefulWidget {
+  const TaskScreen({super.key});
 
   @override
-  _UserPageState createState() => _UserPageState();
+  State<TaskScreen> createState() => _TaskScreenState();
 }
 
-class _UserPageState extends State<UserPage> {
-  void _addUser() {
-    String name = '';
-    String email = '';
-    final _emailFormKey = GlobalKey<FormState>();
+class _TaskScreenState extends State<TaskScreen> {
+  List<Map<String, dynamic>> data = [];
+  List<String> months = [
+    'Jan',
+    "Feb",
+    'Mar',
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec"
+  ];
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-      ),
-      builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 16.0,
-            right: 16.0,
-            top: 16.0,
+  @override
+  void initState() {
+    super.initState();
+    fetchData().then((fetchedData) {
+      setState(() {
+        data = fetchedData;
+      });
+    });
+  }
+
+  // Method to fetch data from Firestore
+  Future<List<Map<String, dynamic>>> fetchData() async {
+    try {
+      final QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('users').get();
+      final List<QueryDocumentSnapshot> documents = snapshot.docs;
+      return documents
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
+    } catch (e) {
+      log("Error fetching data: $e");
+      return [];
+    }
+  }
+
+  void _navigateToAddTaskPage() async {
+    final result = await Navigator.of(context).push<Map<String, dynamic>>(
+      MaterialPageRoute(builder: (context) => AddTaskPage(data: data)),
+    );
+
+    if (result != null) {
+      // handle returned tasks and user if needed
+    }
+  }
+
+  Card customCard({ts, data, index, isSubmitted}) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      child: ListTile(
+        title: Text(
+          data[index]['taskname'],
+          style: TextStyle(
+            decoration:
+                isSubmitted ? TextDecoration.lineThrough : TextDecoration.none,
           ),
-          child: Form(
-            key: _emailFormKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Add New User',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  decoration: const InputDecoration(labelText: 'Name'),
-                  onChanged: (value) {
-                    print("object");
-                    name = value;
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  onChanged: (value) {
-                    email = value;
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter an email';
-                    } else if (!RegExp(r'^[^@]+@gmail\.com$').hasMatch(value)) {
-                      return 'Please enter a valid @gmail.com email address';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('Cancel'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_emailFormKey.currentState!.validate()) {
-                          if (name.isNotEmpty && email.isNotEmpty) {
-                            Provider.of<UserProvider>(context, listen: false)
-                                .addUser(name, email);
-                            Navigator.of(context).pop();
-                          }
-                        }
-                      },
-                      child: const Text('Add'),
-                    ),
-                  ],
-                ),
-              ],
+        ),
+        subtitle: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              " ${ts.toDate().day} , ${months[ts.toDate().month - 1]} ${ts.toDate().year.toString().substring(2, 4)}",
+              style: TextStyle(color: Colors.grey),
             ),
+            Text(
+              'To: ${data[index]['name']}',
+              style: const TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+        trailing: IconButton(
+          icon: const Icon(
+            Icons.delete,
+            color: Colors.black45,
           ),
-        );
-      },
+          onPressed: () {
+            _confirmDeleteTask(data[index]['taskname'].replaceAll(' ', '_'));
+          },
+        ),
+      ),
     );
   }
 
-  Future<void> _confirmDeleteUser(int index) async {
-    bool? confirm = await showDialog<bool>(
+  void _confirmDeleteTask(String taskId) {
+    showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Confirm Deletion'),
-          content: const Text('Are you sure you want to delete this user?'),
-          actions: [
+          content: Text(
+              'Are you sure you want to delete the task with ID ${taskId.replaceAll('_', " ")}?'),
+          actions: <Widget>[
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
               child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
             ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Delete'),
+            ElevatedButton(
+              child: const Text(
+                'Delete',
+              ),
+              onPressed: () async {
+                try {
+                  await FirebaseFirestore.instance
+                      .collection('tasks')
+                      .doc(taskId)
+                      .delete();
+                  setState(() {});
+                } catch (e) {
+                  log("Error deleting task: $e");
+                }
+                Navigator.of(context).pop();
+              },
             ),
           ],
         );
       },
     );
-
-    if (confirm == true) {
-      Provider.of<UserProvider>(context, listen: false).deleteUser(index);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<UserProvider>(
-        builder: (context, userProvider, child) {
-          return ListView.builder(
-            itemCount: userProvider.users.length,
-            itemBuilder: (context, index) {
-              return Card(
-                margin:
-                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                child: ListTile(
-                  title: Text('${userProvider.users[index]['name']}'),
-                  subtitle: Text(
-                    '${userProvider.users[index]['email']}',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    color: Colors.black54,
-                    onPressed: () => _confirmDeleteUser(index),
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addUser,
+        onPressed: _navigateToAddTaskPage,
         child: const Icon(Icons.add),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Pending Tasks StreamBuilder
+              StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection("tasks")
+                    .where('submittime', isEqualTo: '-')
+                    .orderBy('createtime', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    var data = snapshot.data!.docs;
+                    return data.isEmpty
+                        ? const Text("No Pending Tasks")
+                        : Column(
+                            children: [
+                              const Align(
+                                alignment: Alignment(-0.8, 0),
+                                child: Text(
+                                  "Pending Tasks",
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ),
+                              ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: data.length,
+                                itemBuilder: (context, index) {
+                                  Timestamp ts = data[index]['createtime'];
+                                  // return Card(
+                                  //   margin: const EdgeInsets.symmetric(
+                                  //       vertical: 8.0, horizontal: 16.0),
+                                  //   child: ListTile(
+                                  //     title: Text(
+                                  //       data[index]['taskname'],
+                                  //       style: const TextStyle(),
+                                  //     ),
+                                  //     subtitle: Align(
+                                  //       alignment: Alignment.bottomRight,
+                                  //       child: Text(
+                                  //         'Assigned to: ${data[index]['name']}',
+                                  //         style: const TextStyle(
+                                  //             color: Colors.grey),
+                                  //       ),
+                                  //     ),
+                                  //     trailing: IconButton(
+                                  //       icon: const Icon(
+                                  //         Icons.delete,
+                                  //         color: Colors.black54,
+                                  //       ),
+                                  //       onPressed: () {
+                                  //         _confirmDeleteTask(data[index]
+                                  //                 ['taskname']
+                                  //             .replaceAll(' ', '_'));
+                                  //       },
+                                  //     ),
+                                  //   ),
+                                  // );
+                                  return customCard(
+                                      ts: ts,
+                                      data: data,
+                                      index: index,
+                                      isSubmitted: false);
+                                },
+                              ),
+                            ],
+                          );
+                  } else {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                },
+              ),
+              const Divider(),
+
+              /// Submitted Tasks StreamBuilder
+              StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection('tasks')
+                    .where('submittime', isNotEqualTo: '-')
+                    .orderBy('createtime', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const CircularProgressIndicator();
+                  }
+                  var data = snapshot.data!.docs;
+                  return data.isEmpty
+                      ? const Text("No Tasks Submitted Yet")
+                      : Column(
+                          children: [
+                            const Align(
+                              alignment: Alignment(-0.8, 0),
+                              child: Text(
+                                "Submitted Tasks",
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            ),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: data.length,
+                              itemBuilder: (context, index) {
+                                Timestamp ts = data[index]['createtime'];
+                                return customCard(
+                                    ts: ts,
+                                    data: data,
+                                    index: index,
+                                    isSubmitted: true);
+                                // return Card(
+                                //   margin: const EdgeInsets.symmetric(
+                                //       vertical: 8.0, horizontal: 16.0),
+                                //   child: ListTile(
+                                //     title: Text(
+                                //       data[index]['taskname'],
+                                //       style: const TextStyle(
+                                //         decoration: TextDecoration.lineThrough,
+                                //       ),
+                                //     ),
+                                //     subtitle: Align(
+                                //       alignment: Alignment.bottomRight,
+                                //       child: Text(
+                                //         'Assigned to: ${data[index]['name']}',
+                                //         style:
+                                //             const TextStyle(color: Colors.grey),
+                                //       ),
+                                //     ),
+                                //     trailing: IconButton(
+                                //       icon: const Icon(Icons.delete),
+                                //       onPressed: () {
+                                //         _confirmDeleteTask(data[index]
+                                //                 ['taskname']
+                                //             .replaceAll(' ', '_'));
+                                //       },
+                                //     ),
+                                //   ),
+                                // );
+                              },
+                            ),
+                          ],
+                        );
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
-*/
+
+class AddTaskPage extends StatefulWidget {
+  final List<Map<String, dynamic>> data;
+
+  const AddTaskPage({required this.data, Key? key}) : super(key: key);
+
+  @override
+  _AddTaskPageState createState() => _AddTaskPageState();
+}
+
+class _AddTaskPageState extends State<AddTaskPage> {
+  List<TextEditingController> controllers = [TextEditingController()];
+  String? _selectedUser;
+  List<String> tasks = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Add New Task'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: <Widget>[
+            DropdownButton<String>(
+              isExpanded: true,
+              value: _selectedUser,
+              hint: const Text('Select User'),
+              items: widget.data.map((e) {
+                return DropdownMenuItem<String>(
+                  value: "${e['email']}1/1/1${e['name']}",
+                  child: Text(e['name']!),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedUser = value;
+                });
+              },
+            ),
+            const SizedBox(height: 16.0),
+            Expanded(
+              child: ListView.builder(
+                itemCount: tasks.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == tasks.length) {
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: controllers.last,
+                            decoration: const InputDecoration(
+                              labelText: 'Enter task to assign',
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            if (controllers.last.text.isNotEmpty) {
+                              setState(() {
+                                tasks.add(controllers.last.text);
+                                controllers.add(TextEditingController());
+                              });
+                            }
+                          },
+                        ),
+                      ],
+                    );
+                  } else {
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: ListTile(
+                        title: Text(tasks[index]),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            setState(() {
+                              tasks.removeAt(index);
+                              controllers.removeAt(index);
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // Save the tasks and user to Firestore
+                if (_selectedUser != null && tasks.isNotEmpty) {
+                  for (var task in tasks) {
+                    var _email = _selectedUser!.split('1/1/1')[0];
+                    var _name = _selectedUser!.split('1/1/1')[1];
+                    await FirebaseFirestore.instance
+                        .collection("tasks")
+                        .doc(task.trim().replaceAll(' ', '_'))
+                        .set({
+                      'name': _name,
+                      'taskname': task,
+                      'createtime': Timestamp.now(),
+                      'submittime': '-',
+                      'email': _email,
+                    });
+                  }
+                  Navigator.pop(context, {
+                    'tasks': tasks,
+                    'user': _selectedUser,
+                  });
+                }
+              },
+              child: const Text('Submit'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
