@@ -67,8 +67,8 @@ class _UserScreenState extends State<UserScreen> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter an email';
-                    } else if (!RegExp(r'^[^@]+@gmail\.com$').hasMatch(value)) {
-                      return 'Please enter a valid @gmail.com email address';
+                    } else if (value.endsWith("@utu.ac.in")) {
+                      return 'Please Enter a valid UTU Account';
                     }
                     return null;
                   },
@@ -87,7 +87,7 @@ class _UserScreenState extends State<UserScreen> {
                       onPressed: () {
                         final email = _userEmail.text.trim();
                         log("${email}");
-                        if (email.endsWith('@gmail.com')) {
+                        if (email.endsWith('@utu.ac.in')) {
                           // Email is valid, add user
                           FirebaseFirestore.instance
                               .collection('users')
@@ -106,8 +106,7 @@ class _UserScreenState extends State<UserScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               duration: Duration(milliseconds: 1500),
-                              content:
-                                  Text('Please enter a valid Gmail address'),
+                              content: Text('Please enter a valid UTU Account'),
                             ),
                           );
                         }

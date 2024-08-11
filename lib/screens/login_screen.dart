@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_2/main.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -14,8 +15,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _navigateToHome() {
     // Define the valid username and password
-    const validUsername = '00';
-    const validPassword = '00';
+    /*const validUsername = '00';
+    const validPassword = '00';*/
 
     // Check if the entered username and password match the valid credentials
     if (_emailController.text == validUsername &&
