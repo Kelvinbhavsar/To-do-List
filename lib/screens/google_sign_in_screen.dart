@@ -41,7 +41,7 @@ class _GoogleSignInScreenState extends State<GoogleSignInScreen> {
                 try {
                   await signInWithGoogle().then(
                     (value) async {
-                      if (emailPattern.hasMatch(gmailEmail!)) {
+                      if (gmailEmail!.endsWith("@utu.ac.in")) {
                         SharedPrefService.setGmail(gmail: gmailEmail);
                         SharedPrefService.setUser(username: gmailName);
                         if (isNewUser!) {
