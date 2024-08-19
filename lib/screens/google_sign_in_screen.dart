@@ -41,7 +41,8 @@ class _GoogleSignInScreenState extends State<GoogleSignInScreen> {
                 try {
                   await signInWithGoogle().then(
                     (value) async {
-                      if (gmailEmail!.endsWith("@utu.ac.in")) {
+                      // todo VERY IMP @utu validation is reamining
+                      if (/*gmailEmail!.endsWith("@utu.ac.in")*/ true) {
                         SharedPrefService.setGmail(gmail: gmailEmail);
                         SharedPrefService.setUser(username: gmailName);
                         if (isNewUser!) {

@@ -39,6 +39,99 @@ class _TaskScreenState extends State<TaskScreen> {
     });
   }
 
+  Card customCard(
+      {required data, required index, required ts, required bool isSubmitted}) {
+    return Card(
+      color: Colors.white,
+      // Ensure the card background is pure white
+      margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0),
+      elevation: 0,
+      // Adjust elevation for shadow effect
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0), // Rounded edges
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0), // Add padding inside the card
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Task Title with Line Through if Submitted
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    data[index]['taskname'],
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                      decoration: isSubmitted
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
+                    ),
+                  ),
+                ),
+                isSubmitted
+                    ? const Icon(
+                        Icons.check_circle_rounded,
+                        color: Colors.blue,
+                      )
+                    : IconButton(
+                        icon: const Icon(Icons.radio_button_unchecked),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title:
+                                  Text("Are you sure you want to submit it?"),
+                              content:
+                                  Text("Task : ${data[index]['taskname']}"),
+                              actions: [
+                                ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text("Cancel")),
+                                ElevatedButton(
+                                    onPressed: () async {
+                                      await taskCollection
+                                          .doc(data[index]['taskname'])
+                                          .update({
+                                        'submittime': Timestamp.now()
+                                      }).then(
+                                        (value) => Navigator.pop(context),
+                                      );
+                                    },
+                                    child: Text("Yes")),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+              ],
+            ),
+
+            // Horizontal Divider
+            Divider(
+              thickness: 1,
+              color: Colors.grey[200],
+            ),
+
+            const SizedBox(height: 8.0),
+
+            Text(
+              "Assigned on ${months[ts.toDate().month - 1]} ${ts.toDate().day}, ${ts.toDate().year}",
+              style: TextStyle(
+                color: Colors.grey[700],
+                fontSize: 16.0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     getData().then(
@@ -73,61 +166,97 @@ class _TaskScreenState extends State<TaskScreen> {
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.w600),
                         ))
-                      : ListView.builder(
-                          itemCount: data.length,
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemBuilder: (context, index) {
-                            Timestamp ts = data[index]['createtime'];
-
-                            /* return data[index]['submittime'] != '-'
-                                ? SizedBox()
-                                : Card*/
-                            return Card(
-                              margin: EdgeInsets.all(8.0),
-                              child: ListTile(
-                                contentPadding: EdgeInsets.all(16.0),
-                                title: Text(data[index]['taskname']),
-                                subtitle: Text(
-                                    'assigned on : ${ts.toDate().day} , ${months[ts.toDate().month - 1]}'),
-                                trailing: IconButton(
-                                  icon:
-                                      const Icon(Icons.radio_button_unchecked),
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: Text(
-                                            "Are you sure you want to submit it?"),
-                                        content: Text(
-                                            "Task : ${data[index]['taskname']}"),
-                                        actions: [
-                                          ElevatedButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: Text("Cancel")),
-                                          ElevatedButton(
-                                              onPressed: () async {
-                                                await taskCollection
-                                                    .doc(
-                                                        data[index]['taskname'])
-                                                    .update({
-                                                  'submittime': Timestamp.now()
-                                                }).then(
-                                                  (value) =>
-                                                      Navigator.pop(context),
-                                                );
-                                              },
-                                              child: Text("Yes")),
-                                        ],
-                                      ),
-                                    );
-                                  },
+                      : Column(
+                          children: [
+                            Align(
+                              alignment: Alignment(-0.8, 0),
+                              child: Text(
+                                "Pending Tasks",
+                                style: TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
                                 ),
                               ),
-                            );
-                          },
+                            ),
+                            ListView.builder(
+                              itemCount: data.length,
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                Timestamp ts = data[index]['createtime'];
+                                /*return Card(
+                                  color: Colors.white, // Same background color
+                                  margin: const EdgeInsets.symmetric(
+                                      vertical: 10.0, horizontal: 18.0),
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        16.0), // Rounded edges like customCard
+                                  ),
+                                  child: ListTile(
+                                    contentPadding: EdgeInsets.all(16.0),
+                                    title: Expanded(
+                                      child: Text(
+                                        data[index]['taskname'],
+                                        style: const TextStyle(
+                                          fontSize: 18.0,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      'assigned on : ${ts.toDate().day} , ${months[ts.toDate().month - 1]}',
+                                      style: TextStyle(
+                                        color: Colors.grey[700],
+                                        fontSize: 16.0,
+                                      ),
+                                    ),
+                                    trailing: IconButton(
+                                      icon:
+                                          const Icon(Icons.radio_button_unchecked),
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: Text(
+                                                "Are you sure you want to submit it?"),
+                                            content: Text(
+                                                "Task : ${data[index]['taskname']}"),
+                                            actions: [
+                                              ElevatedButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: Text("Cancel")),
+                                              ElevatedButton(
+                                                  onPressed: () async {
+                                                    await taskCollection
+                                                        .doc(
+                                                            data[index]['taskname'])
+                                                        .update({
+                                                      'submittime': Timestamp.now()
+                                                    }).then(
+                                                      (value) =>
+                                                          Navigator.pop(context),
+                                                    );
+                                                  },
+                                                  child: Text("Yes")),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                );*/
+                                return customCard(
+                                    data: data,
+                                    index: index,
+                                    ts: ts,
+                                    isSubmitted: false);
+                              },
+                            ),
+                          ],
                         );
                 }
                 return Container();
@@ -157,7 +286,10 @@ class _TaskScreenState extends State<TaskScreen> {
                             child: Text(
                               "Submitted Tasks",
                               style: TextStyle(
-                                  fontSize: 20, color: Colors.black87),
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                              ),
                             ),
                           ),
                           ListView.builder(
@@ -168,15 +300,28 @@ class _TaskScreenState extends State<TaskScreen> {
                             itemCount: data2.length,
                             itemBuilder: (context, index) {
                               Timestamp ts = data2[index]['createtime'];
-                              return Card(
+                              return customCard(
+                                  data: data2,
+                                  index: index,
+                                  ts: ts,
+                                  isSubmitted: true);
+                              /*return Card(
+                                color: Colors.white, // Same background color
                                 margin: const EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 16.0),
+                                    vertical: 10.0, horizontal: 18.0),
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      16.0), // Rounded edges like customCard
+                                ),
                                 child: ListTile(
-                                  title: Text(
-                                    data2[index]['taskname']!,
-                                    style: const TextStyle(
-                                      color: Colors.black45,
-                                      decoration: TextDecoration.lineThrough,
+                                  title: Expanded(
+                                    child: Text(
+                                      data2[index]['taskname']!,
+                                      style: const TextStyle(
+                                        color: Colors.black45,
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
                                     ),
                                   ),
                                   subtitle: Align(
@@ -187,7 +332,7 @@ class _TaskScreenState extends State<TaskScreen> {
                                   ),
 
                                   /// delete button for submitted tasks
-                                  /* trailing: IconButton(
+                                  */ /* trailing: IconButton(
                                     icon: const Icon(Icons.delete),
                                     onPressed: () {
                                       setState(() async {
@@ -199,9 +344,9 @@ class _TaskScreenState extends State<TaskScreen> {
                                             .delete();
                                       });
                                     },
-                                  ),*/
+                                  ),*/ /*
                                 ),
-                              );
+                              );*/
                             },
                           ),
                         ],
