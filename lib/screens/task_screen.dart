@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:developer';
 
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 class TaskScreen extends StatefulWidget {
   const TaskScreen({super.key});
@@ -62,41 +63,92 @@ class _TaskScreenState extends State<TaskScreen> {
     }
   }
 
-  Card customCard({ts, data, index, isSubmitted}) {
+  Card customCard({
+    required Timestamp ts,
+    required List<QueryDocumentSnapshot> data,
+    required int index,
+    required bool isSubmitted,
+  }) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      child: ListTile(
-        title: Text(
-          "${data[index]['taskname']}",
-          style: TextStyle(
-            decoration:
-                isSubmitted ? TextDecoration.lineThrough : TextDecoration.none,
-          ),
-        ),
-        subtitle: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      color: Colors.white,
+      // Ensure the card background is pure white
+      margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0),
+      elevation: 0,
+      // Adjust elevation for shadow effect
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0), // Rounded edges
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0), // Add padding inside the card
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              " ${ts.toDate().day} , ${months[ts.toDate().month - 1]} ${ts.toDate().year.toString().substring(2, 4)}",
-              style: TextStyle(color: Colors.grey),
+            // Task Title with Line Through if Submitted
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    data[index]['taskname'],
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                      decoration: isSubmitted
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.delete,
+                    color: Colors.black45,
+                  ),
+                  onPressed: () {
+                    // Use the document ID for deletion
+                    _confirmDeleteTask(data[index].id);
+                  },
+                ),
+              ],
             ),
-            Text(
-              'To: ${data[index]['name']}',
-              style: const TextStyle(color: Colors.grey),
+
+            // Horizontal Divider
+            Divider(
+              thickness: 1,
+              color: Colors.grey[200],
+            ),
+
+            const SizedBox(height: 8.0),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "${months[ts.toDate().month - 1]} ${ts.toDate().day}, ${ts.toDate().year}",
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 16.0,
+                  ),
+                ),
+                Text(
+                  data[index]['name'],
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 16.0,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-        trailing: IconButton(
-          icon: const Icon(
-            Icons.delete,
-            color: Colors.black45,
-          ),
-          onPressed: () {
-            _confirmDeleteTask(data[index]['taskname'].toString());
-          },
-        ),
       ),
     );
+  }
+
+  String getCurrentDate() {
+    final DateTime now = DateTime.now();
+    final DateFormat formatter = DateFormat('MMM dd, yyyy');
+    return formatter.format(now);
   }
 
   void _confirmDeleteTask(String taskId) {
@@ -148,31 +200,64 @@ class _TaskScreenState extends State<TaskScreen> {
               children: [
                 // AppBar with FAB
                 Container(
-                  height: 100.0, // Adjust height as needed
-                  color: Color.fromARGB(255, 168, 194, 247),
+                  height: 100.0,
                   child: Stack(
                     children: [
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Padding(
                           padding: const EdgeInsets.only(left: 16.0),
-                          child: Text(
-                            "Today's task",
-                            style: TextStyle(
-                              fontSize: 24.0,
-                              color: Colors.white,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Today's Task",
+                                style: const TextStyle(
+                                  fontSize: 24.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const SizedBox(height: 4.0),
+                              Text(
+                                getCurrentDate(),
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
                       Positioned(
                         bottom: 20,
                         right: 16.0,
-                        child: FloatingActionButton.extended(
+                        child: ElevatedButton.icon(
                           onPressed: _navigateToAddTaskPage,
-                          icon: const Icon(Icons.add), // The "+" icon
-                          label: const Text('New task'), // The text label
-                          backgroundColor: Color.fromARGB(255, 189, 213, 233),
+                          icon: const Icon(
+                            Icons.add,
+                            color: Colors.blue,
+                          ),
+                          label: const Text(
+                            'New Task',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.blue,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFEAF4FF),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 12.0,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14.0),
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -200,7 +285,11 @@ class _TaskScreenState extends State<TaskScreen> {
                                           alignment: Alignment(-0.8, 0),
                                           child: Text(
                                             "Pending Tasks",
-                                            style: TextStyle(fontSize: 20),
+                                            style: TextStyle(
+                                              fontSize: 20.0,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black,
+                                            ),
                                           ),
                                         ),
                                         ListView.builder(
@@ -212,10 +301,11 @@ class _TaskScreenState extends State<TaskScreen> {
                                             Timestamp ts =
                                                 data[index]['createtime'];
                                             return customCard(
-                                                ts: ts,
-                                                data: data,
-                                                index: index,
-                                                isSubmitted: false);
+                                              ts: ts,
+                                              data: data,
+                                              index: index,
+                                              isSubmitted: false,
+                                            );
                                           },
                                         ),
                                       ],
@@ -246,7 +336,11 @@ class _TaskScreenState extends State<TaskScreen> {
                                         alignment: Alignment(-0.8, 0),
                                         child: Text(
                                           "Submitted Tasks",
-                                          style: TextStyle(fontSize: 20),
+                                          style: TextStyle(
+                                            fontSize: 20.0,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.black,
+                                          ),
                                         ),
                                       ),
                                       ListView.builder(
@@ -258,10 +352,11 @@ class _TaskScreenState extends State<TaskScreen> {
                                           Timestamp ts =
                                               data[index]['createtime'];
                                           return customCard(
-                                              ts: ts,
-                                              data: data,
-                                              index: index,
-                                              isSubmitted: true);
+                                            ts: ts,
+                                            data: data,
+                                            index: index,
+                                            isSubmitted: true,
+                                          );
                                         },
                                       ),
                                     ],
@@ -298,28 +393,39 @@ class _AddTaskPageState extends State<AddTaskPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text('Add New Task'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
-            DropdownButton<String>(
-              isExpanded: true,
-              value: _selectedUser,
-              hint: const Text('Select User'),
-              items: widget.data.map((e) {
-                return DropdownMenuItem<String>(
-                  value: "${e['email']}1/1/1${e['name']}",
-                  child: Text(e['name']!),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedUser = value;
-                });
-              },
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: _selectedUser,
+                hint: const Text('Select User'),
+                items: widget.data.map((e) {
+                  return DropdownMenuItem<String>(
+                    value: "${e['email']}1/1/1${e['name']}",
+                    child: Text(e['name']!),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedUser = value;
+                  });
+                },
+                underline: Container(),
+                dropdownColor: Colors.white,
+              ),
             ),
             const SizedBox(height: 16.0),
             Expanded(
@@ -330,10 +436,24 @@ class _AddTaskPageState extends State<AddTaskPage> {
                     return Row(
                       children: [
                         Expanded(
-                          child: TextField(
-                            controller: controllers.last,
-                            decoration: const InputDecoration(
-                              labelText: 'Enter task to assign',
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: TextField(
+                              cursorColor: Colors.black,
+                              controller: controllers.last,
+                              decoration: const InputDecoration(
+                                labelText: 'Enter task to assign',
+                                labelStyle: TextStyle(
+                                    color: Colors
+                                        .black), // Change label text color to blue
+                                border: OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(8.0)),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -352,6 +472,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
                     );
                   } else {
                     return Card(
+                      color: Colors.white,
+                      elevation: 0,
                       margin: const EdgeInsets.symmetric(vertical: 8.0),
                       child: ListTile(
                         title: Text(tasks[index]),
@@ -371,29 +493,49 @@ class _AddTaskPageState extends State<AddTaskPage> {
               ),
             ),
             ElevatedButton(
-              onPressed: () async {
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEAF4FF),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 12.0,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14.0),
+                ),
+              ),
+              onPressed: () {
                 if (_selectedUser != null && tasks.isNotEmpty) {
+                  final selectedData = _selectedUser!.split("1/1/1");
+                  final String userEmail = selectedData[0];
+                  final String userName = selectedData[1];
                   for (var task in tasks) {
-                    var _email = _selectedUser!.split('1/1/1')[0];
-                    var _name = _selectedUser!.split('1/1/1')[1];
-                    await FirebaseFirestore.instance
-                        .collection("tasks")
-                        .doc(task.trim())
+                    // final String taskId = task.replaceAll(' ', '_');
+                    final Timestamp timestamp = Timestamp.now();
+                    FirebaseFirestore.instance
+                        .collection('tasks')
+                        .doc(task)
                         .set({
-                      'name': _name,
-                      'taskname': task.trim(),
-                      'createtime': Timestamp.now(),
-                      'submittime': '-',
-                      'email': _email,
+                      'email': userEmail,
+                      'name': userName,
+                      'taskname': task,
+                      'submittime': "-",
+                      'createtime': timestamp,
                     });
                   }
-                  Navigator.pop(context, {
-                    'tasks': tasks,
-                    'user': _selectedUser,
-                  });
+                  Navigator.of(context).pop();
                 }
               },
-              child: const Text('Submit'),
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  'Submit',
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -401,3 +543,124 @@ class _AddTaskPageState extends State<AddTaskPage> {
     );
   }
 }
+
+// class AddTaskPage extends StatefulWidget {
+//   final List<Map<String, dynamic>> data;
+//
+//   const AddTaskPage({required this.data, Key? key}) : super(key: key);
+//
+//   @override
+//   _AddTaskPageState createState() => _AddTaskPageState();
+// }
+//
+// class _AddTaskPageState extends State<AddTaskPage> {
+//   List<TextEditingController> controllers = [TextEditingController()];
+//   String? _selectedUser;
+//   List<String> tasks = [];
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text('Add New Task'),
+//       ),
+//       body: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Column(
+//           children: <Widget>[
+//             DropdownButton<String>(
+//               isExpanded: true,
+//               value: _selectedUser,
+//               hint: const Text('Select User'),
+//               items: widget.data.map((e) {
+//                 return DropdownMenuItem<String>(
+//                   value: "${e['email']}1/1/1${e['name']}",
+//                   child: Text(e['name']!),
+//                 );
+//               }).toList(),
+//               onChanged: (value) {
+//                 setState(() {
+//                   _selectedUser = value;
+//                 });
+//               },
+//             ),
+//             const SizedBox(height: 16.0),
+//             Expanded(
+//               child: ListView.builder(
+//                 itemCount: tasks.length + 1,
+//                 itemBuilder: (context, index) {
+//                   if (index == tasks.length) {
+//                     return Row(
+//                       children: [
+//                         Expanded(
+//                           child: TextField(
+//                             controller: controllers.last,
+//                             decoration: const InputDecoration(
+//                               labelText: 'Enter task to assign',
+//                             ),
+//                           ),
+//                         ),
+//                         IconButton(
+//                           icon: const Icon(Icons.add),
+//                           onPressed: () {
+//                             if (controllers.last.text.isNotEmpty) {
+//                               setState(() {
+//                                 tasks.add(controllers.last.text);
+//                                 controllers.add(TextEditingController());
+//                               });
+//                             }
+//                           },
+//                         ),
+//                       ],
+//                     );
+//                   } else {
+//                     return Card(
+//                       margin: const EdgeInsets.symmetric(vertical: 8.0),
+//                       child: ListTile(
+//                         title: Text(tasks[index]),
+//                         trailing: IconButton(
+//                           icon: const Icon(Icons.delete),
+//                           onPressed: () {
+//                             setState(() {
+//                               tasks.removeAt(index);
+//                               controllers.removeAt(index);
+//                             });
+//                           },
+//                         ),
+//                       ),
+//                     );
+//                   }
+//                 },
+//               ),
+//             ),
+//             ElevatedButton(
+//               onPressed: () async {
+//                 if (_selectedUser != null && tasks.isNotEmpty) {
+//                   for (var task in tasks) {
+//                     var _email = _selectedUser!.split('1/1/1')[0];
+//                     var _name = _selectedUser!.split('1/1/1')[1];
+//                     await FirebaseFirestore.instance
+//                         .collection("tasks")
+//                         .doc(task.trim())
+//                         .set({
+//                       'name': _name,
+//                       'taskname': task.trim(),
+//                       'createtime': Timestamp.now(),
+//                       'submittime': '-',
+//                       'email': _email,
+//                     });
+//                   }
+//                   Navigator.pop(context, {
+//                     'tasks': tasks,
+//                     'user': _selectedUser,
+//                   });
+//                 }
+//               },
+//               child: const Text('Submit'),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }

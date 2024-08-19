@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/main.dart';
+import 'package:get/get.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -26,9 +27,10 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else {
-      // Show an error message if credentials are incorrect
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid username or password')),
+      Get.snackbar(
+        "Error",
+        "Invalid username or password",
+        duration: Duration(milliseconds: 1000),
       );
     }
   }
