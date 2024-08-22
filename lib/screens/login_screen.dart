@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_application_2/main.dart';
 import 'package:get/get.dart';
 import 'home_screen.dart';
@@ -13,7 +15,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
+  FocusNode myFocusNode = new FocusNode();
   void _navigateToHome() {
     // Define the valid username and password
     /*const validUsername = '00';
@@ -30,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Get.snackbar(
         "Error",
         "Invalid username or password",
-        duration: Duration(milliseconds: 1000),
+        duration: Duration(milliseconds: 1300),
       );
     }
   }
@@ -52,16 +54,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: 150, // Adjust the width as needed
               ),
               Spacer(flex: 1),
-              TextFormField(
+              TextField(
+                focusNode: myFocusNode,
                 controller: _emailController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   icon: Icon(Icons.email),
                   hintText: 'Enter Your Username/Email',
                   labelText: 'Email or Username',
                 ),
               ),
               Spacer(flex: 1),
-              TextFormField(
+              TextField(
                 controller: _passwordController,
                 obscureText: true,
                 decoration: const InputDecoration(

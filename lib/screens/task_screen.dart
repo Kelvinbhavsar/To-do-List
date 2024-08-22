@@ -350,7 +350,7 @@ class _TaskScreenState extends State<TaskScreen> {
                                         itemCount: data.length,
                                         itemBuilder: (context, index) {
                                           Timestamp ts =
-                                              data[index]['createtime'];
+                                              data[index]['submittime'];
                                           return customCard(
                                             ts: ts,
                                             data: data,
@@ -513,11 +513,11 @@ class _AddTaskPageState extends State<AddTaskPage> {
                     final Timestamp timestamp = Timestamp.now();
                     FirebaseFirestore.instance
                         .collection('tasks')
-                        .doc(task)
+                        .doc(task.trim())
                         .set({
                       'email': userEmail,
                       'name': userName,
-                      'taskname': task,
+                      'taskname': task.trim(),
                       'submittime': "-",
                       'createtime': timestamp,
                     });

@@ -66,7 +66,13 @@ class _MyAppState extends State<MyApp> {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        scaffoldBackgroundColor: Colors.grey[100],
         primarySwatch: Colors.blue,
+        textButtonTheme: TextButtonThemeData(
+          style: ButtonStyle(
+            foregroundColor: WidgetStatePropertyAll(Colors.blueAccent),
+          ),
+        ),
         textSelectionTheme: const TextSelectionThemeData(
           cursorColor: Colors.blue,
           selectionColor: Colors.blue,
@@ -79,6 +85,9 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
+          floatingLabelStyle: TextStyle(color: Colors.blue),
+          labelStyle: TextStyle(color: Colors.black54),
+          focusColor: Colors.blue,
           focusedBorder: const OutlineInputBorder(
             borderSide: BorderSide(color: Colors.blue),
           ),

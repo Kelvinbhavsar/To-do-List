@@ -86,6 +86,7 @@ class _HomeScreenState extends State<HomeScreen>
               color: Colors.white,
               child: TabBar(
                 labelColor: Colors.black,
+                labelStyle: TextStyle(fontWeight: FontWeight.bold),
                 unselectedLabelColor: Colors.grey,
                 indicatorColor: Colors.black,
                 controller: _tabController,
