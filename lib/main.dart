@@ -27,6 +27,36 @@ class MyApp extends StatelessWidget {
     precacheImage(AssetImage('assets/images/google_logo.png'), context);
     return Sizer(
       builder: (context, orientation, deviceType) => MaterialApp(
+        theme: ThemeData(
+          scaffoldBackgroundColor: Colors.grey[100],
+          primarySwatch: Colors.blue,
+          textButtonTheme: TextButtonThemeData(
+            style: ButtonStyle(
+              foregroundColor: WidgetStatePropertyAll(Colors.blueAccent),
+            ),
+          ),
+          textSelectionTheme: const TextSelectionThemeData(
+            cursorColor: Colors.blue,
+            selectionColor: Colors.blue,
+            selectionHandleColor: Colors.blue,
+          ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEAF4FF),
+              foregroundColor: Colors.blue,
+            ),
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            focusedBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.blue),
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Colors.grey),
+            ),
+          ),
+        ),
+
         debugShowCheckedModeBanner: false,
         // home: GoogleSignInScreen(),
         home: SplashScreen(),

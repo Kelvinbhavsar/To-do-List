@@ -65,6 +65,7 @@ class _GoogleSignInScreenState extends State<GoogleSignInScreen> {
                         }
                       } else {
                         await signOutGoogle();
+                        // todo install get and use getsnackbar
                         ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                                 content: Text("Please enter amtics id!!!")));

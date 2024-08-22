@@ -76,6 +76,7 @@ class _HomeScreenState extends State<HomeScreen>
       },
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.white,
           toolbarHeight: 40,
           elevation: 0,
           bottom: PreferredSize(
@@ -84,10 +85,15 @@ class _HomeScreenState extends State<HomeScreen>
             child: TabBar(
               indicatorColor: Colors.black,
               unselectedLabelColor: Colors.grey,
-              labelStyle: TextStyle(color: Colors.black),
+              labelStyle: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18),
               controller: _tabController,
               tabs: const <Widget>[
-                Tab(text: 'Tasks'),
+                Tab(
+                  text: 'Tasks',
+                ),
                 Tab(text: 'Profile'),
               ],
             ),

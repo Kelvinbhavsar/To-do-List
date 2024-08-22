@@ -87,7 +87,7 @@ class _TaskScreenState extends State<TaskScreen> {
                               content:
                                   Text("Task : ${data[index]['taskname']}"),
                               actions: [
-                                ElevatedButton(
+                                TextButton(
                                     onPressed: () {
                                       Navigator.pop(context);
                                     },
@@ -123,7 +123,7 @@ class _TaskScreenState extends State<TaskScreen> {
               "Assigned on ${months[ts.toDate().month - 1]} ${ts.toDate().day}, ${ts.toDate().year}",
               style: TextStyle(
                 color: Colors.grey[700],
-                fontSize: 16.0,
+                fontSize: 14.0,
               ),
             ),
           ],
@@ -262,7 +262,6 @@ class _TaskScreenState extends State<TaskScreen> {
                 return Container();
               },
             ),
-            Divider(),
 
             /// submit
             StreamBuilder(
@@ -278,9 +277,10 @@ class _TaskScreenState extends State<TaskScreen> {
                 }
                 var data2 = snapshot.data!.docs;
                 return data2.length == 0
-                    ? Text("No Task Submitted Yet")
+                    ? SizedBox()
                     : Column(
                         children: [
+                          Divider(),
                           Align(
                             alignment: Alignment(-0.8, 0),
                             child: Text(
@@ -305,48 +305,6 @@ class _TaskScreenState extends State<TaskScreen> {
                                   index: index,
                                   ts: ts,
                                   isSubmitted: true);
-                              /*return Card(
-                                color: Colors.white, // Same background color
-                                margin: const EdgeInsets.symmetric(
-                                    vertical: 10.0, horizontal: 18.0),
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      16.0), // Rounded edges like customCard
-                                ),
-                                child: ListTile(
-                                  title: Expanded(
-                                    child: Text(
-                                      data2[index]['taskname']!,
-                                      style: const TextStyle(
-                                        color: Colors.black45,
-                                        decoration: TextDecoration.lineThrough,
-                                      ),
-                                    ),
-                                  ),
-                                  subtitle: Align(
-                                    alignment: Alignment.bottomRight,
-                                    child: Text(
-                                        style: TextStyle(color: Colors.black87),
-                                        'assigned on : ${ts.toDate().day} , ${months[ts.toDate().month - 1]} ${ts.toDate().year.toString().substring(2, 4)}'),
-                                  ),
-
-                                  /// delete button for submitted tasks
-                                  */ /* trailing: IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    onPressed: () {
-                                      setState(() async {
-                                        await FirebaseFirestore.instance
-                                            .collection('tasks')
-                                            .doc(data2[index]['taskname']
-                                                .toString()
-                                                .replaceAll(' ', '_'))
-                                            .delete();
-                                      });
-                                    },
-                                  ),*/ /*
-                                ),
-                              );*/
                             },
                           ),
                         ],
