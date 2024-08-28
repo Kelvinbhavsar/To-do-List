@@ -106,7 +106,7 @@ class _TaskScreenState extends State<TaskScreen> {
                   ),
                   onPressed: () {
                     // Use the document ID for deletion
-                    _confirmDeleteTask(data[index].id);
+                    _confirmDeleteTask(data[index].id.trim());
                   },
                 ),
               ],
@@ -175,7 +175,7 @@ class _TaskScreenState extends State<TaskScreen> {
                   log("-${taskId}-");
                   await FirebaseFirestore.instance
                       .collection('tasks')
-                      .doc(taskId.trim())
+                      .doc(taskId)
                       .delete();
                   setState(() {});
                 } catch (e) {
