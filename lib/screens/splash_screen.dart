@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:user_todo/auths/shared_pref.dart';
@@ -30,11 +31,10 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future getUsername() async {
     String? getgmail = await SharedPrefService.getGmail();
-    // String? getImageUrl = await SharedPrefService.getImageUrl();
     String? data = await SharedPrefService.getUsername();
     setState(() {
       userGmail = getgmail ?? '';
-      // userImageUrl = getImageUrl ?? '';
+
       userName = data ?? '';
     });
   }
@@ -68,15 +68,6 @@ class _SplashScreenState extends State<SplashScreen>
 
     getUsername().whenComplete(
       () => Timer(Duration(seconds: 3), () {
-        // log('user - $user \nisotp - ${otpVerification}');
-        // if (user != '' && otpVerification == 'done') {
-
-        // if(user == ''){
-        //   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => GoogleSignInScreen(),));
-        // }else{
-        //   Navigator()
-        // }
-
         if (userName != '') {
           // Get.off(HomeScreen());
           Navigator.pushReplacement(
@@ -85,14 +76,13 @@ class _SplashScreenState extends State<SplashScreen>
                 builder: (context) => HomeScreen(),
               ));
         } else {
-          // Get.off(HomeScreen());
-          // Get.off(GoogleSignInScreen());
           Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => GoogleSignInScreen(),
               ));
         }
+        _controller.dispose();
       }),
     );
 
