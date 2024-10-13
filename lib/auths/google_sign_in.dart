@@ -12,7 +12,12 @@ String? gmailName;
 String? gmailEmail;
 bool? isNewUser;
 String? imageUrl;
-final RegExp emailPattern = RegExp(r'^\d{2}amtics\d{3}@gmail\.com$');
+
+// todo : change regex when launch
+// final RegExp emailPattern = RegExp(r'^\d{2}amtics\d{3}@gmail\.com$');
+
+/// amtics id
+// final RegExp emailPattern = RegExp(r'^\d{2}amtics\d{3}@gmail\.com$');
 
 Future<String> otpVerificationStatus() async {
   String otpVerificationDone = 'nope';
@@ -51,9 +56,6 @@ Future signInWithGoogle() async {
 
   final User? currentUser = FirebaseAuth.instance.currentUser;
   assert(user.uid == currentUser!.uid);
-
-  if (!emailPattern.hasMatch(gmailEmail!)) {}
-
   print('signInWithGoogle succeeded: $user');
   return '$user';
 }
