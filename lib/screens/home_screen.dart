@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:user_todo/screens/Profile.dart';
-import 'package:user_todo/screens/task_screen.dart';
+import 'package:flutter_application_2/screens/task_screen.dart';
+import 'package:flutter_application_2/screens/user_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -12,7 +12,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
-  TabController? _tabController;
+  late TabController _tabController;
 
   Future<bool?> _showBackDialog() {
     return showDialog<bool>(
@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   void dispose() {
-    _tabController!.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -76,34 +76,35 @@ class _HomeScreenState extends State<HomeScreen>
       },
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          toolbarHeight: 40,
+          toolbarHeight: 20,
           elevation: 0,
-          bottom: PreferredSize(
-            preferredSize:
-                const Size.fromHeight(8), // Set the desired height here
-            child: TabBar(
-              indicatorColor: Colors.black,
-              unselectedLabelColor: Colors.grey,
-              labelStyle: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18),
-              controller: _tabController,
-              tabs: const <Widget>[
-                Tab(
-                  text: 'Tasks',
-                ),
-                Tab(text: 'Profile'),
-              ],
-            ),
-          ),
+          backgroundColor: Colors.white,
         ),
-        body: TabBarView(
-          controller: _tabController,
-          children: <Widget>[
-            TaskScreen(),
-            ProfileScreen(),
+        body: Column(
+          children: [
+            Container(
+              color: Colors.white,
+              child: TabBar(
+                labelColor: Colors.black,
+                labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                unselectedLabelColor: Colors.grey,
+                indicatorColor: Colors.black,
+                controller: _tabController,
+                tabs: const <Widget>[
+                  Tab(text: 'Members'),
+                  Tab(text: 'Task'),
+                ],
+              ),
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: const <Widget>[
+                  UserScreen(),
+                  TaskScreen(),
+                ],
+              ),
+            ),
           ],
         ),
       ),
